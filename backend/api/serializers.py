@@ -5,6 +5,7 @@ from django.contrib.auth.hashers import make_password
 from rest_framework import serializers
 
 # from recipes.models import Subscribe
+from recipes.models import Ingredient, Tag
 from users.models import User
 
 ERR_MSG = 'Не удается войти в систему с предоставленными учетными данными.'
@@ -25,8 +26,13 @@ class UserListSerializer(
     class Meta:
         model = User
         fields = (
-            'email', 'id', 'username',
-            'first_name', 'last_name', 'is_subscribed')
+            'email',
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            # 'is_subscribed'
+        )
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
@@ -48,19 +54,6 @@ class UserPasswordSerializer(serializers.Serializer):
     current_password = serializers.CharField(
         label='Текущий пароль')
 
-    # def validate_current_password(self, current_password):
-    #     user = self.context['request'].user
-    #     if not authenticate(
-    #             username=user.email,
-    #             password=current_password):
-    #         raise serializers.ValidationError(
-    #             ERR_MSG, code='authorization')
-    #     return current_password
-    #
-    # def validate_new_password(self, new_password):
-    #     validators.validate_password(new_password)
-    #     return new_password
-
     def create(self, validated_data):
         user = self.context['request'].user
         password = make_password(
@@ -79,3 +72,26 @@ class GetTokenSerializer(serializers.Serializer):
     # def validate_username(self, value):
     #     unacceptable_username(value)
     #     return value
+
+
+class IngredientSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = (
+            "id",
+            "name",
+            "measurement_unit",
+        )
+        model = Ingredient
+
+
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = (
+            "id",
+            "name",
+            "color",
+            "slug",
+        )
+        model = Tag
+
+

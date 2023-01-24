@@ -13,9 +13,18 @@ class User(AbstractUser):
     last_name = models.CharField(
         'Фамилия',
         max_length=150)
+    # is_subscribed = models.BooleanField(
+    #     help_text='Подписан ли текущий пользователь на этого',
+    #     default=False
+    # )
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
+    REQUIRED_FIELDS = (
+        'username',
+        'first_name',
+        'last_name',
+        # 'is_subscribed',
+    )
 
     class Meta:
         verbose_name = 'Пользователь'
@@ -24,3 +33,26 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.email
+
+
+class Follow(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        null=True,
+        related_name='follower',
+        verbose_name='Подписчик'
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        null=True,
+        related_name='following',
+        verbose_name='Автор'
+    )
+
+    class Meta:
+        constraints = (models.UniqueConstraint(
+            fields=['user', 'author'],
+            name='user_to_author_follow',
+        ),)

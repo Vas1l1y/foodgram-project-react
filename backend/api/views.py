@@ -6,12 +6,13 @@ from djoser import utils
 from djoser.compat import get_user_email
 from djoser.conf import settings
 from djoser.views import UserViewSet
-from rest_framework import status, views, generics, serializers
+from rest_framework import status, views, generics, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from api.serializers import UserListSerializer, UserCreateSerializer
+from api.serializers import UserListSerializer, UserCreateSerializer, IngredientSerializer, TagSerializer
+from recipes.models import Ingredient, Tag
 from users.models import User
 
 
@@ -77,12 +78,12 @@ class UsersViewSet(UserViewSet):
         return Response({'Пароль успешно изменен'}, status=status.HTTP_204_NO_CONTENT)
 
 
-class TokenSerializer(serializers.ModelSerializer):
-    auth_token = serializers.CharField(source="key")
-
-    class Meta:
-        model = settings.TOKEN_MODEL
-        fields = ("auth_token",)
+# class TokenSerializer(serializers.ModelSerializer):
+#     auth_token = serializers.CharField(source="key")
+#
+#     class Meta:
+#         model = settings.TOKEN_MODEL
+#         fields = ("auth_token",)
 
 
 class TokenCreateView(utils.ActionViewMixin, generics.GenericAPIView):
@@ -113,3 +114,13 @@ class TokenDestroyView(views.APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class IngredientViewSet(viewsets.ModelViewSet):
+    queryset = Ingredient.objects.all()
+    serializer_class = IngredientSerializer
+    pagination_class = None
+
+
+class TagViewSet(viewsets.ModelViewSet):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    pagination_class = None
