@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     'users',
     'recipes',
     'api',
-    # 'users.apps.UsersConfig',
 ]
 
 MIDDLEWARE = [
@@ -125,11 +124,6 @@ REST_FRAMEWORK = {
 }
 
 
-# SIMPLE_JWT = {
-#     # Устанавливаем срок жизни токена
-#    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
-#    'AUTH_HEADER_TYPES': ('Bearer',),
-# }
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
