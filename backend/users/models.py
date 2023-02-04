@@ -1,58 +1,70 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.db.models import UniqueConstraint
+
+from users.validators import validate_username
 
 
 class User(AbstractUser):
+    """Пользовательская модель - Пользователь."""
+
     email = models.EmailField(
-        'Email',
+        'Почта',
         max_length=254,
-        unique=True,)
+        unique=True)
     first_name = models.CharField(
         'Имя',
-        max_length=150)
+        max_length=150,
+        blank=False
+    )
     last_name = models.CharField(
         'Фамилия',
-        max_length=150)
-    # is_subscribed = models.BooleanField(
-    #     help_text='Подписан ли текущий пользователь на этого',
-    #     default=False
-    # )
+        max_length=150,
+        blank=False)
+    username = models.CharField(
+        'Юзернейм',
+        max_length=150,
+        validators=[validate_username])
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = (
         'username',
         'first_name',
         'last_name',
-        # 'is_subscribed',
     )
 
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
-        ordering = ('id',)
+        ordering = ('-id',)
 
     def __str__(self):
-        return self.email
+        return self.username
 
 
 class Follow(models.Model):
+    """Модель - Подписка."""
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        null=True,
         related_name='follower',
         verbose_name='Подписчик'
     )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        null=True,
-        related_name='following',
+        related_name='author',
         verbose_name='Автор'
     )
 
     class Meta:
-        constraints = (models.UniqueConstraint(
-            fields=['user', 'author'],
-            name='user_to_author_follow',
-        ),)
+        constraints = [
+            UniqueConstraint(
+                fields=['user', 'author'],
+                name='user_author_unique',
+            )
+        ]
+
+    def __str__(self):
+        return f'{self.user} подписался на {self.author}'
