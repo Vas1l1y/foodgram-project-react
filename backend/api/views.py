@@ -8,7 +8,7 @@ from djoser import utils
 from djoser.compat import get_user_email
 from djoser.conf import settings
 from djoser.views import UserViewSet
-from rest_framework import status, views, generics, viewsets
+from rest_framework import status, views, generics, viewsets, permissions
 from rest_framework.decorators import action, api_view
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -56,7 +56,6 @@ class UsersViewSet(UserViewSet):
         if self.request.method.lower() == 'post':
             return UserCreateSerializer
         return CustomUserSerializer
-        # return UserListSerializer
 
     def perform_create(self, serializer):
         password = make_password(self.request.data['password'])
@@ -119,10 +118,9 @@ class FollowViewWrite(APIView):
             data=data,
             context={'request': request}
         )
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request, id):
         author = get_object_or_404(User, id=id)
@@ -177,7 +175,10 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-    """Создать/получить/обновить/удалить рецепт."""
+    """
+    Создать/получить/обновить/удалить рецепт.
+    Добавить/удалить рецепт в/из список покупок/избранное.
+    """
 
     permission_classes = (AdminOrAuthorOrReadOnly,)
     queryset = Recipe.objects.all()
@@ -194,78 +195,42 @@ class RecipeViewSet(viewsets.ModelViewSet):
         context.update({'request': self.request})
         return context
 
+    @staticmethod
+    def post_delete_method(request, pk, serializers, model):
+        user = request.user.pk
+        recipe = get_object_or_404(Recipe, id=pk)
+        if request.method == 'POST':
+            data = {'user': user, 'recipe': pk}
+            serializer = serializers(data=data, context={'request': request})
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        result = get_object_or_404(model, user=user, recipe=recipe)
+        result.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-class FavoriteView(APIView):
-    """Добавить/удалить рецепт в/из избранное(ого)."""
-
-    permission_classes = [IsAuthenticated, ]
-    pagination_class = CustomPagination
-
-    def post(self, request, id):
-        data = {
-            'user': request.user.id,
-            'recipe': id
-        }
-        if not Favorite.objects.filter(
-                user=request.user,
-                recipe__id=id
-        ).exists():
-            serializer = FavoriteSerializerWrite(
-                data=data, context={'request': request}
+    @action(methods=['post', 'delete'],
+            detail=True, url_path='shopping_cart',
+            permission_classes=[permissions.IsAuthenticated]
             )
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+    def shopping_cart(self, request, pk):
+        return self.post_delete_method(
+            request=request, pk=pk,
+            serializers=ShoppingCartSerializer,
+            model=ShoppingCart
+        )
 
-    def delete(self, request, id):
-        recipe = get_object_or_404(Recipe, id=id)
-        if Favorite.objects.filter(
-                user=request.user,
-                recipe=recipe).exists():
-            Favorite.objects.filter(
-                user=request.user,
-                recipe=recipe).delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-
-
-class ShoppingCartView(APIView):
-    """Добавить/удалить рецепт в/из список покупок."""
-
-    permission_classes = (IsAuthenticated, )
-
-    def post(self, request, id):
-        data = {
-            'user': request.user.id,
-            'recipe': id
-        }
-        recipe = get_object_or_404(Recipe, id=id)
-        if not ShoppingCart.objects.filter(
-                user=request.user,
-                recipe=recipe).exists():
-            serializer = ShoppingCartSerializer(
-                data=data,
-                context={'request': request}
+    @action(methods=['post', 'delete'],
+            detail=True, url_path='favorite',
+            permission_classes=[AdminOrAuthorOrReadOnly]
             )
-            if serializer.is_valid():
-                serializer.save()
-                return Response(
-                    serializer.data,
-                    status=status.HTTP_201_CREATED
-                )
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, id):
-        recipe = get_object_or_404(Recipe, id=id)
-        if ShoppingCart.objects.filter(
-                user=request.user,
-                recipe=recipe).exists():
-            ShoppingCart.objects.filter(
-                user=request.user,
-                recipe=recipe).delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+    def favorite(self, request, pk):
+        return self.post_delete_method(
+            request=request,
+            pk=pk,
+            serializers=FavoriteSerializerWrite,
+            model=Favorite
+        )
 
 
 @api_view(['GET'])
@@ -275,11 +240,11 @@ def download_shopping_cart(request):
         recipe__shopping_cart__user=request.user
     ).values(
         'ingredient__name', 'ingredient__measurement_unit'
-    ).annotate(amount=Sum('amount'))
+    ).annotate(ingredient_amount=Sum('amount'))
     for num, i in enumerate(ingredients):
         ingredient_list += (
             f"\n{i['ingredient__name']} - "
-            f"{i['amount']} {i['ingredient__measurement_unit']}"
+            f"{i['ingredient_amount']} {i['ingredient__measurement_unit']}"
         )
         if num < ingredients.count() - 1:
             ingredient_list += ', '

@@ -50,12 +50,12 @@ class Ingredient(models.Model):
         verbose_name = "Игредиент"
         verbose_name_plural = "Игредиенты"
 
-    constraints = [
-            UniqueConstraint(
-                fields=('name', 'measurement_unit'),
-                name='ingredient_name_unit_unique'
-            )
-        ]
+        constraints = [
+                UniqueConstraint(
+                    fields=('name', 'measurement_unit'),
+                    name='ingredient_name_unit_unique'
+                )
+            ]
 
     def __str__(self):
         return self.name
@@ -80,14 +80,6 @@ class Recipe(models.Model):
         on_delete=models.CASCADE,
         related_name='recipes',
         verbose_name='Автор рецепта'
-    )
-    is_favorite = models.BooleanField(
-        verbose_name='В избранном',
-        default=False,
-    )
-    is_in_shopping_cart = models.BooleanField(
-        verbose_name='В корзине',
-        default=False
     )
     name = models.CharField(
         max_length=200,
@@ -127,6 +119,7 @@ class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
+        related_name='recipe',
         verbose_name='Рецепт'
     )
     ingredient = models.ForeignKey(

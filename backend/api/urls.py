@@ -9,8 +9,6 @@ from api.views import (
     RecipeViewSet,
     FollowViewRead,
     FollowViewWrite,
-    ShoppingCartView,
-    FavoriteView,
     download_shopping_cart
 )
 
@@ -35,17 +33,6 @@ urlpatterns = [
           'auth/token/logout/',
           views.TokenDestroyView.as_view(),
           name="logout"
-     ),
-
-     path(
-          'recipes/<int:id>/shopping_cart/',
-          ShoppingCartView.as_view(),
-          name='shopping_cart'
-     ),
-     path(
-          'recipes/<int:id>/favorite/',
-          FavoriteView.as_view(),
-          name='favorite'
      ),
      path(
           'users/subscriptions/',

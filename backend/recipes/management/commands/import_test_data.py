@@ -1,14 +1,24 @@
-import pandas as pd
+import csv
+
+from django.core.management.base import BaseCommand
 
 from recipes.models import Ingredient
 
-df = pd.read_csv('../data/ingredients.csv', sep=',')
-ingredients = []
-for i in range(len(df)):
-    ingredients.append(
-        Ingredient(
-            name=df.iloc[i][0],
-            measurement_unit=df.iloc[i][1],
-        )
-    )
-Ingredient.objects.bulk_create(ingredients)
+
+class Command(BaseCommand):
+    """Загрузчик ингредиентов из csv файла."""
+
+    def handle(self, *args, **options):
+        self.import_ingredients()
+        print('Загрузка завершена.')
+
+    def import_ingredients(self, file='ingredients.csv'):
+        print(f'Загрузка файла {file}...')
+        file_path = f'../data/{file}'
+        with open(file_path, newline='', encoding='utf-8') as f:
+            reader = csv.reader(f)
+            for row in reader:
+                status, created = Ingredient.objects.update_or_create(
+                    name=row[0],
+                    measurement_unit=row[1]
+                )
