@@ -1,7 +1,5 @@
-from django.shortcuts import get_object_or_404
-
-
 from django.contrib.auth.hashers import make_password
+from django.shortcuts import get_object_or_404
 from djoser.serializers import UserSerializer
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
@@ -213,22 +211,19 @@ class RecipeSerializerWrite(serializers.ModelSerializer):
         )
 
     def validate(self, data):
-        serializer = RecipeSerializerWrite(data=data)
-        if serializer.is_valid():
-            ingredients = data.ingredients
-            recipe_list = []
-            for ingredient in ingredients:
-                amount = ingredient['amount']
-                if int(amount) <= 0:
-                    raise serializers.ValidationError(
-                        {'amount': 'Количество ингредиентов не может быть меньше 1'}
-                    )
-                if ingredient['id'] in recipe_list:
-                    raise serializers.ValidationError(
-                        {'ingredient': 'Такой ингредиент уже есть'}
-                    )
-                recipe_list.append(ingredient['id'])
-            return data
+        ingredients = data['ingredients']
+        recipe_list = []
+        for ingredient in ingredients:
+            amount = ingredient['amount']
+            if int(amount) <= 0:
+                raise serializers.ValidationError(
+                    {'amount': 'Количество ингредиентов не может быть меньше 1'}
+                )
+            if ingredient['id'] in recipe_list:
+                raise serializers.ValidationError(
+                    {'ingredient': 'Такой ингредиент уже есть'}
+                )
+            recipe_list.append(ingredient['id'])
         return data
 
     def create_ingredients(self, ingredients, recipe):
@@ -241,12 +236,17 @@ class RecipeSerializerWrite(serializers.ModelSerializer):
                 amount=ingredients[0]['amount']
             )
         ])
-        print(objs)
         return objs
 
     def create_tags(self, tags, recipe):
         for tag in tags:
-            RecipeTag.objects.create(recipe=recipe, tag=tag)
+            objs = RecipeTag.objects.bulk_create([
+                RecipeTag(
+                    tag=tag,
+                    recipe=recipe,
+                )
+            ])
+            return objs
 
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
