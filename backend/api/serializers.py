@@ -240,13 +240,14 @@ class RecipeSerializerWrite(serializers.ModelSerializer):
 
     def create_tags(self, tags, recipe):
         for tag in tags:
+            tag = get_object_or_404(Tag, name=tag)
             objs = RecipeTag.objects.bulk_create([
                 RecipeTag(
                     tag=tag,
                     recipe=recipe,
                 )
             ])
-            return objs
+        return objs
 
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
