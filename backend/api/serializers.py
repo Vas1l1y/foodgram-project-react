@@ -227,27 +227,21 @@ class RecipeSerializerWrite(serializers.ModelSerializer):
         return data
 
     def create_ingredients(self, ingredients, recipe):
-        id = ingredients[0]['id']
-        ingredient = get_object_or_404(Ingredient, id=id)
-        objs = RecipeIngredient.objects.bulk_create([
+        RecipeIngredient.objects.bulk_create([
             RecipeIngredient(
-                ingredient=ingredient,
+                ingredient=Ingredient.objects.get(id=ingredient['id']),
                 recipe=recipe,
-                amount=ingredients[0]['amount']
-            )
+                amount=ingredient['amount']
+            ) for ingredient in ingredients
         ])
-        return objs
 
     def create_tags(self, tags, recipe):
-        for tag in tags:
-            tag = get_object_or_404(Tag, name=tag)
-            objs = RecipeTag.objects.bulk_create([
+        RecipeTag.objects.bulk_create([
                 RecipeTag(
                     tag=tag,
                     recipe=recipe,
-                )
+                ) for tag in tags
             ])
-        return objs
 
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
