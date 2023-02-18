@@ -363,7 +363,7 @@ class FavoriteSerializerWrite(serializers.ModelSerializer):
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
-    """Сериализатор списка покупок."""
+    """Сериализатор списка покупок. """
 
     class Meta:
         model = ShoppingCart
