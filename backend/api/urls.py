@@ -43,8 +43,7 @@ urlpatterns = [
         name='subscribe'
     ),
     path(
-        'recipes/download_shopping_cart/',
-        name='download_shopping_cart'
+        'recipes/download_shopping_cart/'
     ),
     path('', include(router.urls)),
     path('', include('djoser.urls')),
