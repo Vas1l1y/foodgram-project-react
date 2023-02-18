@@ -216,7 +216,7 @@ class RecipeSerializerWrite(serializers.ModelSerializer):
             amount = ingredient['amount']
             if int(amount) <= 0:
                 raise serializers.ValidationError(
-                    {'amount': 'Количество ингредиентов не может быть меньше 1'}
+                    {'amount': 'Количество ингредиентов меньше 1'}
                 )
             if ingredient['id'] in recipe_list:
                 raise serializers.ValidationError(
@@ -236,11 +236,11 @@ class RecipeSerializerWrite(serializers.ModelSerializer):
 
     def create_tags(self, tags, recipe):
         RecipeTag.objects.bulk_create([
-                RecipeTag(
-                    tag=tag,
-                    recipe=recipe,
-                ) for tag in tags
-            ])
+            RecipeTag(
+                tag=tag,
+                recipe=recipe,
+            ) for tag in tags
+        ])
 
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')

@@ -71,13 +71,15 @@ class UsersViewSet(UserViewSet):
         if settings.PASSWORD_CHANGED_EMAIL_CONFIRMATION:
             context = {'user': self.request.user}
             to = [get_user_email(self.request.user)]
-            settings.EMAIL.password_changed_confirmation(self.request, context).send(to)
+            settings.EMAIL.password_changed_confirmation(
+                self.request, context).send(to)
 
         if settings.LOGOUT_ON_PASSWORD_CHANGE:
             utils.logout_user(self.request)
         elif settings.CREATE_SESSION_ON_LOGIN:
             update_session_auth_hash(self.request, self.request.user)
-        return Response({'Пароль успешно изменен'}, status=status.HTTP_204_NO_CONTENT)
+        return Response({'Пароль успешно изменен'},
+            status=status.HTTP_204_NO_CONTENT)
 
 
 class TokenCreateView(utils.ActionViewMixin, generics.GenericAPIView):
@@ -89,7 +91,9 @@ class TokenCreateView(utils.ActionViewMixin, generics.GenericAPIView):
     def _action(self, serializer):
         token = utils.login_user(self.request, serializer.user)
         token_serializer_class = settings.SERIALIZERS.token
-        return Response(data=token_serializer_class(token).data, status=status.HTTP_201_CREATED
+        return Response(
+            data=token_serializer_class(token).data,
+            status=status.HTTP_201_CREATED
         )
 
 

@@ -23,7 +23,6 @@ router.register('recipes', RecipeViewSet, basename='recipes')
 
 
 urlpatterns = [
-     
      path(
           'auth/token/login/',
           views.TokenCreateView.as_view(),
@@ -52,6 +51,3 @@ urlpatterns = [
      path('', include(router.urls)),
      path('', include('djoser.urls')),
 ]
-
-
-
