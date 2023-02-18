@@ -9,7 +9,6 @@ from api.views import (
     RecipeViewSet,
     FollowViewRead,
     FollowViewWrite,
-    download_shopping_cart
 )
 
 app_name = 'api'
