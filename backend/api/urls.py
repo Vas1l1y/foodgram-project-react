@@ -24,29 +24,28 @@ router.register('recipes', RecipeViewSet, basename='recipes')
 
 urlpatterns = [
      path(
-          'auth/token/login/',
-          views.TokenCreateView.as_view(),
-          name="login"
+         'auth/token/login/',
+         views.TokenCreateView.as_view(),
+         name="login"
      ),
      path(
-          'auth/token/logout/',
-          views.TokenDestroyView.as_view(),
-          name="logout"
+         'auth/token/logout/',
+         views.TokenDestroyView.as_view(),
+         name="logout"
      ),
      path(
-          'users/subscriptions/',
-          FollowViewRead.as_view(),
-          name='subscriptions'
+         'users/subscriptions/',
+         FollowViewRead.as_view(),
+         name='subscriptions'
      ),
      path(
-          'users/<int:id>/subscribe/',
-          FollowViewWrite.as_view(),
-          name='subscribe'
+         'users/<int:id>/subscribe/',
+         FollowViewWrite.as_view(),
+         name='subscribe'
      ),
      path(
-        'recipes/download_shopping_cart/',
-        download_shopping_cart,
-        name='download_shopping_cart'
+         'recipes/download_shopping_cart/',
+         name='download_shopping_cart'
      ),
      path('', include(router.urls)),
      path('', include('djoser.urls')),
