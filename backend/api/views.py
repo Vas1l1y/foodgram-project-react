@@ -79,7 +79,7 @@ class UsersViewSet(UserViewSet):
         elif settings.CREATE_SESSION_ON_LOGIN:
             update_session_auth_hash(self.request, self.request.user)
         return Response({'Пароль успешно изменен'},
-            status=status.HTTP_204_NO_CONTENT)
+                        status=status.HTTP_204_NO_CONTENT)
 
 
 class TokenCreateView(utils.ActionViewMixin, generics.GenericAPIView):

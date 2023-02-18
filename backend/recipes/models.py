@@ -51,11 +51,11 @@ class Ingredient(models.Model):
         verbose_name_plural = "Игредиенты"
 
         constraints = [
-                UniqueConstraint(
-                    fields=('name', 'measurement_unit'),
-                    name='ingredient_name_unit_unique'
-                )
-            ]
+            UniqueConstraint(
+                fields=('name', 'measurement_unit'),
+                name='ingredient_name_unit_unique'
+            )
+        ]
 
     def __str__(self):
         return self.name
