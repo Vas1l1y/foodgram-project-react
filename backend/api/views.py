@@ -183,19 +183,21 @@ class RecipeViewSet(viewsets.ModelViewSet):
     Добавить/удалить рецепт в/из список покупок/избранное.
     """
 
-    permission_classes = (AdminOrAuthorOrReadOnly,)
+    permission_classes = [AdminOrAuthorOrReadOnly, ]
+    pagination_class = CustomPagination
     queryset = Recipe.objects.all()
     filter_backends = [DjangoFilterBackend, ]
-    pagination_class = CustomPagination
     filterset_class = RecipeFilter
 
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
-
     def get_serializer_class(self):
-        if self.request.method in SAFE_METHODS:
+        if self.request.method == 'GET':
             return RecipeSerializerRead
         return RecipeSerializerWrite
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'request': self.request})
+        return context
 
     @action(
         detail=True,
