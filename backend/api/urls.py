@@ -1,4 +1,5 @@
 from django.urls import include, path
+from djoser import views
 from rest_framework.routers import DefaultRouter
 
 from api.views import (
@@ -6,6 +7,8 @@ from api.views import (
     IngredientViewSet,
     TagViewSet,
     RecipeViewSet,
+    FollowViewRead,
+    FollowViewWrite,
 )
 
 app_name = 'api'
@@ -19,5 +22,26 @@ router.register('recipes', RecipeViewSet, basename='recipes')
 
 
 urlpatterns = [
+    path(
+        'auth/token/login/',
+        views.TokenCreateView.as_view(),
+        name="login"
+    ),
+    path(
+        'auth/token/logout/',
+        views.TokenDestroyView.as_view(),
+        name="logout"
+    ),
+    path(
+        'users/subscriptions/',
+        FollowViewRead.as_view(),
+        name='subscriptions'
+    ),
+    path(
+        'users/<int:id>/subscribe/',
+        FollowViewWrite.as_view(),
+        name='subscribe'
+    ),
     path('', include(router.urls)),
+    path('', include('djoser.urls')),
 ]
