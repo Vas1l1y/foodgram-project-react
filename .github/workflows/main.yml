@@ -16,7 +16,7 @@ jobs:
       # для развёртывания окружения Python
       uses: actions/setup-python@v2
       with:
-        # Выбор версии Python.
+        # Выбор версии Python
         python-version: 3.7
 
     - name: Install dependencies
