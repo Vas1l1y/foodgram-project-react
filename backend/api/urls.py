@@ -42,6 +42,9 @@ urlpatterns = [
         FollowViewWrite.as_view(),
         name='subscribe'
     ),
+    path(
+        'recipes/download_shopping_cart/'
+    ),
     path('', include(router.urls)),
     path('', include('djoser.urls')),
 ]
