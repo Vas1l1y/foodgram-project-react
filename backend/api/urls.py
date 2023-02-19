@@ -7,8 +7,6 @@ from api.views import (
     IngredientViewSet,
     TagViewSet,
     RecipeViewSet,
-    FollowViewRead,
-    FollowViewWrite,
 )
 
 app_name = 'api'
