@@ -118,7 +118,7 @@ class IngredientAddInRecipeSerializer(serializers.ModelSerializer):
 
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
-    """Сериализатор для Рецепта и Ингредиентов. """
+    """Сериализатор для Рецепта и Ингредиентов."""
 
     id = serializers.ReadOnlyField(source='ingredient.id')
     name = serializers.ReadOnlyField(source='ingredient.name')
