@@ -11,11 +11,11 @@ from djoser.views import UserViewSet
 from rest_framework import status, views, generics, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.generics import ListAPIView
-from rest_framework.permissions import IsAuthenticated, AllowAny, SAFE_METHODS
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api.filters import RecipeFilter
+from api.filters import RecipeFilter, IngredientFilter
 from api.pagination import CustomPagination
 from api.permissions import AdminOrAuthorOrReadOnly
 from api.serializers import (
@@ -161,9 +161,10 @@ class FollowViewRead(ListAPIView):
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     """Игредиенты."""
 
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticatedOrReadOnly, )
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
+    filter_backends = (IngredientFilter, )
     pagination_class = None
     search_fileds = ('^name',)
 
@@ -183,21 +184,18 @@ class RecipeViewSet(viewsets.ModelViewSet):
     Добавить/удалить рецепт в/из список покупок/избранное.
     """
 
-    permission_classes = [AdminOrAuthorOrReadOnly, ]
-    pagination_class = CustomPagination
+    permission_classes = (AdminOrAuthorOrReadOnly,)
     queryset = Recipe.objects.all()
     filter_backends = [DjangoFilterBackend, ]
+    serializer_class = RecipeSerializerWrite
+    pagination_class = CustomPagination
     filterset_class = RecipeFilter
+
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
             return RecipeSerializerRead
         return RecipeSerializerWrite
-
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context.update({'request': self.request})
-        return context
 
     @action(
         detail=True,

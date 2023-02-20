@@ -9,6 +9,7 @@ from api.views import (
     RecipeViewSet,
     FollowViewRead,
     FollowViewWrite,
+    download_shopping_cart,
 )
 
 app_name = 'api'
@@ -41,6 +42,11 @@ urlpatterns = [
         'users/<int:id>/subscribe/',
         FollowViewWrite.as_view(),
         name='subscribe'
+    ),
+    path(
+        'recipes/download_shopping_cart/',
+        download_shopping_cart,
+        name='download_shopping_cart'
     ),
     path('', include(router.urls)),
     path('', include('djoser.urls')),
