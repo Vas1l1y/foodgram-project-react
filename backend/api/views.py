@@ -11,7 +11,11 @@ from djoser.views import UserViewSet
 from rest_framework import status, views, generics, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.generics import ListAPIView
-from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import (
+    IsAuthenticated,
+    AllowAny,
+    IsAuthenticatedOrReadOnly
+)
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -190,7 +194,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeSerializerWrite
     pagination_class = CustomPagination
     filterset_class = RecipeFilter
-
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
