@@ -185,7 +185,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 class RecipeViewSet(viewsets.ModelViewSet):
     """
     Создать/получить/обновить/удалить рецепт.
-    Добавить/удалить рецепт в/из список покупок/избранное.
+    Добавить/удалить рецепт в/из список покупок/избранное .
     """
 
     permission_classes = (AdminOrAuthorOrReadOnly,)
