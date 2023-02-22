@@ -1,4 +1,5 @@
 from django.contrib.auth.hashers import make_password
+from django.db import transaction
 from djoser.serializers import UserSerializer
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
@@ -242,13 +243,13 @@ class RecipeSerializerWrite(serializers.ModelSerializer):
             ) for tag in tags
         ])
 
+    @transaction.atomic
     def create(self, validated_data):
-        request = self.context.get('request', None)
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
-        recipe = Recipe.objects.create(author=request.user, **validated_data)
+        recipe = Recipe.objects.create(**validated_data)
         recipe.tags.set(tags)
-        self.create_ingredients(recipe, ingredients)
+        self.create_ingredients(recipe=recipe, ingredients=ingredients)
         return recipe
 
     def update(self, instance, validated_data):

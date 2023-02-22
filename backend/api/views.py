@@ -14,7 +14,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.permissions import (
     IsAuthenticated,
     AllowAny,
-    IsAuthenticatedOrReadOnly
+    IsAuthenticatedOrReadOnly, SAFE_METHODS
 )
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -168,9 +168,8 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly, )
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    filter_backends = (IngredientFilter, )
+    filterset_class = IngredientFilter
     pagination_class = None
-    search_fileds = ('^name',)
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -191,12 +190,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
     permission_classes = (AdminOrAuthorOrReadOnly,)
     queryset = Recipe.objects.all()
     filter_backends = [DjangoFilterBackend, ]
-    serializer_class = RecipeSerializerWrite
     pagination_class = CustomPagination
     filterset_class = RecipeFilter
 
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
     def get_serializer_class(self):
-        if self.request.method == 'GET':
+        if self.request.method in SAFE_METHODS:
             return RecipeSerializerRead
         return RecipeSerializerWrite
 
@@ -208,7 +209,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def favorite(self, request, pk):
         if request.method == 'POST':
             return self.add_to(Favorite, request.user, pk)
-        return self.delete_from(Favorite, request.user, pk)
+        else:
+            return self.delete_from(Favorite, request.user, pk)
 
     @action(
         detail=True,
